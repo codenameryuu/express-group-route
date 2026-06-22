@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: { "express-route-grouping": "src/index.ts" },
+  entry: { "express-group-route": "src/index.ts" },
   format: ["cjs", "esm"],
   dts: true,
   splitting: false,

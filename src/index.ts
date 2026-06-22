@@ -2,9 +2,12 @@ import { IRouter as IExpressRouter, Router, NextFunction } from "express";
 import pluralize from "pluralize";
 import listRoutes from "express-list-routes";
 
-import { isResourceConfig, makeCamelCase, makePlaceholder, normalizePath } from "./utils";
+import { isResourceConfig, makeCamelCase, makePlaceholder, normalizePath, toExpressPath } from "./utils";
 import { EndpointNames, GroupArgs, IResource, IRouter, RegisterCb, RequestMethods, ResourceType } from "../types";
 import RESOURCES from "./resources";
+
+const ROUTE_GROUP_METHODS = new Set(["getPath", "getRouter", "export", "listRoutes", "group", "resource"]);
+type RouteGroupPublicKey = "getPath" | "getRouter" | "export" | "listRoutes" | "group" | "resource";
 
 class RouteGroup {
   private head: string;
@@ -24,6 +27,10 @@ class RouteGroup {
   }
 
   public getRouter() {
+    return this.router;
+  }
+
+  public export() {
     return this.router;
   }
 
@@ -97,7 +104,7 @@ class RouteGroup {
       }
 
       const http = fn.bind(this.router);
-      http(names.join("/"), ...this.middlewares, midds, handler.bind(handlers));
+      http(toExpressPath(names.join("/")), ...this.middlewares, midds, handler.bind(handlers));
     });
 
     return this;
@@ -107,7 +114,7 @@ class RouteGroup {
     return typeof arg === "function"
       ? (path: string, ...inlineMiddlewares: NextFunction[]) => {
           const http = arg.bind(this.router);
-          const route = normalizePath(this.head, path);
+          const route = toExpressPath(normalizePath(this.head, path));
           http(route, ...this.middlewares, ...inlineMiddlewares);
         }
       : this.router[arg];
@@ -115,12 +122,18 @@ class RouteGroup {
 
   private createProxy(router: IExpressRouter, target: RouteGroup) {
     const callRouter = this.callRouter.bind(target);
-    const handler = {
-      get: function (_: unknown, prop: "group" | "path") {
-        return Reflect.has(target, prop) ? Reflect.get<RouteGroup, string>(target, prop) : callRouter(router[prop as RequestMethods]);
+    const handler: ProxyHandler<IRouter> = {
+      get: (_target, prop) => {
+        if (typeof prop === "string" && ROUTE_GROUP_METHODS.has(prop)) {
+          return Reflect.get(target, prop as RouteGroupPublicKey);
+        }
+        if (typeof prop === "string") {
+          return callRouter(router[prop as RequestMethods]);
+        }
+        return undefined;
       },
     };
-    return new Proxy<IRouter>(this as unknown as IRouter, handler);
+    return new Proxy(this as unknown as IRouter, handler);
   }
 
   private parseGroupArgs(args: unknown[]) {
@@ -146,4 +159,5 @@ class RouteGroup {
   }
 }
 
+export type { EndpointNames, GroupArgs, IResource, IRouter, RegisterCb, RequestMethods, ResourceType } from "../types";
 export default RouteGroup;

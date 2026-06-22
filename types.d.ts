@@ -36,6 +36,7 @@ export type ResourceType = {
 export type IRouter = IExpressRouter & {
   getPath(): string;
   getRouter: () => IExpressRouter;
+  export: () => IExpressRouter;
   listRoutes: () => { method: string; path: string }[];
   group: (...args: GroupArgs) => IRouter;
   resource: (ins: IResource | ResourceType) => IRouter;

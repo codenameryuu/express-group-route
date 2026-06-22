@@ -1,13 +1,13 @@
 {
-    "name": "@codenameryuu/express-route-group",
-    "version": "1.0.0",
+    "name": "@codenameryuu/express-group-route",
+    "version": "1.5.0",
     "description": "Easy route grouping for Express JS with resource api model.",
     "author": "codenameryuu",
     "license": "MIT",
-    "homepage": "https://github.com/codenameryuu/express-route-group#readme",
+    "homepage": "https://github.com/codenameryuu/express-group-route#readme",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/codenameryuu/express-route-group.git"
+        "url": "git+https://github.com/codenameryuu/express-group-route.git"
     },
     "engines": {
         "node": ">=24.0.0"
@@ -46,15 +46,19 @@
         "resource",
         "api"
     ],
-    "main": "dist/express-route-grouping.cjs.production.min.js",
-    "module": "dist/express-route-grouping.esm.js",
-    "types": "dist/express-route-grouping.d.ts",
+    "publishConfig": {
+        "tag": "latest",
+        "access": "public"
+    },
+    "main": "dist/express-group-route.cjs.production.min.js",
+    "module": "dist/express-group-route.esm.js",
+    "types": "dist/express-group-route.d.ts",
     "size-limit": [{
-            "path": "dist/express-route-grouping.cjs.production.min.js",
+            "path": "dist/express-group-route.cjs.production.min.js",
             "limit": "10 KB"
         },
         {
-            "path": "dist/express-route-grouping.esm.js",
+            "path": "dist/express-group-route.esm.js",
             "limit": "10 KB"
         }
     ],

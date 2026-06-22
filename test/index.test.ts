@@ -7,7 +7,7 @@ import { BlogController, CommentController } from "./fixtures";
 
 const sandbox = sinon.createSandbox();
 
-describe("express-route-grouping", () => {
+describe("express-group-route", () => {
   afterEach(() => {
     sandbox.restore();
   });
@@ -104,6 +104,29 @@ describe("express-route-grouping", () => {
     });
   });
 
+  describe("export", () => {
+    it("should return the express router instance", () => {
+      const expressRouter = Router();
+      const router = new RouteGroup("", expressRouter);
+
+      expect(router.export()).toBe(expressRouter);
+      expect(router.export()).toBe(router.getRouter());
+    });
+  });
+
+  describe("express path", () => {
+    it("should register grouped routes with a leading slash", () => {
+      const router = new RouteGroup("/", Router());
+
+      router.group("auth", (group: IRouter) => {
+        group.post("login", () => {});
+      });
+
+      expect(router.listRoutes()).toStrictEqual([{ method: "POST", path: "/auth/login" }]);
+      expect(router.getRouter().stack[0].route?.path).toEqual("/auth/login");
+    });
+  });
+
   describe("resource", () => {
     it("should generate routes from current position", () => {
       // Arrange
@@ -117,13 +140,13 @@ describe("express-route-grouping", () => {
 
       // Assert
       expect(router.listRoutes()).toStrictEqual([
-        { method: "GET", path: "v1/blogs/comments/all" },
-        { method: "GET", path: "v1/blogs/comments" },
-        { method: "GET", path: "v1/blogs/comments/:commentId" },
-        { method: "POST", path: "v1/blogs/comments" },
-        { method: "PUT", path: "v1/blogs/comments/:commentId" },
-        { method: "PATCH", path: "v1/blogs/comments/:commentId" },
-        { method: "DELETE", path: "v1/blogs/comments/:commentId" },
+        { method: "GET", path: "/v1/blogs/comments/all" },
+        { method: "GET", path: "/v1/blogs/comments" },
+        { method: "GET", path: "/v1/blogs/comments/:commentId" },
+        { method: "POST", path: "/v1/blogs/comments" },
+        { method: "PUT", path: "/v1/blogs/comments/:commentId" },
+        { method: "PATCH", path: "/v1/blogs/comments/:commentId" },
+        { method: "DELETE", path: "/v1/blogs/comments/:commentId" },
       ]);
     });
 
@@ -138,23 +161,23 @@ describe("express-route-grouping", () => {
       });
 
       expect(router.listRoutes()).toStrictEqual([
-        { method: "GET", path: "blogs/:blogId/comments/:commentId/likes" },
+        { method: "GET", path: "/blogs/:blogId/comments/:commentId/likes" },
         {
           method: "GET",
-          path: "blogs/:blogId/comments/:commentId/likes/:likeId",
+          path: "/blogs/:blogId/comments/:commentId/likes/:likeId",
         },
-        { method: "POST", path: "blogs/:blogId/comments/:commentId/likes" },
+        { method: "POST", path: "/blogs/:blogId/comments/:commentId/likes" },
         {
           method: "PUT",
-          path: "blogs/:blogId/comments/:commentId/likes/:likeId",
+          path: "/blogs/:blogId/comments/:commentId/likes/:likeId",
         },
         {
           method: "PATCH",
-          path: "blogs/:blogId/comments/:commentId/likes/:likeId",
+          path: "/blogs/:blogId/comments/:commentId/likes/:likeId",
         },
         {
           method: "DELETE",
-          path: "blogs/:blogId/comments/:commentId/likes/:likeId",
+          path: "/blogs/:blogId/comments/:commentId/likes/:likeId",
         },
       ]);
     });
@@ -174,23 +197,23 @@ describe("express-route-grouping", () => {
 
       // Assert
       expect(router.listRoutes()).toStrictEqual([
-        { method: "GET", path: "blogs/:slug/comments/:commentId/likes" },
+        { method: "GET", path: "/blogs/:slug/comments/:commentId/likes" },
         {
           method: "GET",
-          path: "blogs/:slug/comments/:commentId/likes/:likeId",
+          path: "/blogs/:slug/comments/:commentId/likes/:likeId",
         },
-        { method: "POST", path: "blogs/:slug/comments/:commentId/likes" },
+        { method: "POST", path: "/blogs/:slug/comments/:commentId/likes" },
         {
           method: "PUT",
-          path: "blogs/:slug/comments/:commentId/likes/:likeId",
+          path: "/blogs/:slug/comments/:commentId/likes/:likeId",
         },
         {
           method: "PATCH",
-          path: "blogs/:slug/comments/:commentId/likes/:likeId",
+          path: "/blogs/:slug/comments/:commentId/likes/:likeId",
         },
         {
           method: "DELETE",
-          path: "blogs/:slug/comments/:commentId/likes/:likeId",
+          path: "/blogs/:slug/comments/:commentId/likes/:likeId",
         },
       ]);
     });
@@ -208,10 +231,10 @@ describe("express-route-grouping", () => {
 
       // Assert
       expect(router.listRoutes()).toStrictEqual([
-        { method: "GET", path: "blogs/:blogId/comments" },
-        { method: "GET", path: "blogs/:blogId/comments/:commentId" },
-        { method: "PUT", path: "blogs/:blogId/comments/:commentId" },
-        { method: "PATCH", path: "blogs/:blogId/comments/:commentId" },
+        { method: "GET", path: "/blogs/:blogId/comments" },
+        { method: "GET", path: "/blogs/:blogId/comments/:commentId" },
+        { method: "PUT", path: "/blogs/:blogId/comments/:commentId" },
+        { method: "PATCH", path: "/blogs/:blogId/comments/:commentId" },
       ]);
     });
 
@@ -235,24 +258,24 @@ describe("express-route-grouping", () => {
       const { stack } = router.getRouter();
 
       // Assert
-      const index = stack.find((s) => s?.route?.path === "blogs" && s?.route?.stack[0].name === "m1");
+      const index = stack.find((s) => s?.route?.path === "/blogs" && s?.route?.stack[0].name === "m1");
       expect(index?.route?.stack[0].name).toEqual("m1");
       expect(index?.route?.stack.length).toEqual(2);
 
-      const show = stack.find((s) => s?.route?.path === "blogs/:blogId" && s?.route?.stack[0].name === "m2");
+      const show = stack.find((s) => s?.route?.path === "/blogs/:blogId" && s?.route?.stack[0].name === "m2");
       expect(show?.route?.stack[0].name).toEqual("m2");
       expect(show?.route?.stack.length).toEqual(2);
 
-      const store = stack.find((s) => s?.route?.path === "blogs" && s?.route?.stack.length === 1);
+      const store = stack.find((s) => s?.route?.path === "/blogs" && s?.route?.stack.length === 1);
       expect(store?.route?.stack.length).toEqual(1);
 
-      const update = stack.find((s) => s?.route?.path === "blogs/:blogId" && s?.route?.stack.length === 1);
+      const update = stack.find((s) => s?.route?.path === "/blogs/:blogId" && s?.route?.stack.length === 1);
       expect(update?.route?.stack.length).toEqual(1);
 
-      const patch = stack.find((s) => s?.route?.path === "blogs/:blogId" && s?.route?.stack.length === 1);
+      const patch = stack.find((s) => s?.route?.path === "/blogs/:blogId" && s?.route?.stack.length === 1);
       expect(patch?.route?.stack.length).toEqual(1);
 
-      const destroy = stack.find((s) => s?.route?.path === "blogs/:blogId" && s?.route?.stack.length === 1);
+      const destroy = stack.find((s) => s?.route?.path === "/blogs/:blogId" && s?.route?.stack.length === 1);
       expect(destroy?.route?.stack.length).toEqual(1);
     });
 

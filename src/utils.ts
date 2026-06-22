@@ -22,6 +22,16 @@ export const normalizePath = (...paths: string[]) => {
   return paths.map(sanitizer).filter(Boolean).join("/");
 };
 
+export const toExpressPath = (path: string) => {
+  const normalized = normalizePath(path);
+
+  if (!normalized) {
+    return "/";
+  }
+
+  return `/${normalized}`;
+};
+
 export const isResourceConfig = (opts: IResource | ResourceType): opts is ResourceType => {
   return "handlers" in opts;
 };

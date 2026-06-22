@@ -17,7 +17,7 @@ yarn add @codenameryuu/express-group-route
 ## Usage
 
 ```typescript
-import RouteGrouping from 'express-route-grouping';
+import RouteGrouping from '@codenameryuu/express-group-route';
 
 const root = RouteGrouping();
 
@@ -76,7 +76,7 @@ You can use the resource API model to create a RESTful API. Resource api modelin
 Let's see the examples:
 
 ```typescript
-import { IResource } from 'express-route-grouping';
+import { IResource } from '@codenameryuu/express-group-route';
 
 class UserController implements IResource {
   index(req, res) {
